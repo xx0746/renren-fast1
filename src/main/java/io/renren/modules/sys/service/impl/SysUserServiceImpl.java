@@ -8,6 +8,8 @@
 
 package io.renren.modules.sys.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,8 +17,12 @@ import io.renren.common.exception.RRException;
 import io.renren.common.utils.Constant;
 import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.Query;
+import io.renren.modules.performance.entity.PerformanceEntity;
+import io.renren.modules.performance.service.PerformanceService;
 import io.renren.modules.sys.dao.SysUserDao;
+import io.renren.modules.sys.entity.SysRoleEntity;
 import io.renren.modules.sys.entity.SysUserEntity;
+import io.renren.modules.sys.entity.SysUserRoleEntity;
 import io.renren.modules.sys.service.SysRoleService;
 import io.renren.modules.sys.service.SysUserRoleService;
 import io.renren.modules.sys.service.SysUserService;
@@ -27,10 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -44,19 +48,59 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 	private SysUserRoleService sysUserRoleService;
 	@Autowired
 	private SysRoleService sysRoleService;
+	@Autowired
+	private PerformanceService performanceService;
 
 	@Override
 	public PageUtils queryPage(Map<String, Object> params) {
 		String username = (String)params.get("username");
 		Long createUserId = (Long)params.get("createUserId");
+		String role = (String)params.get("role");
+		List userids = (ArrayList)params.get("userIds");
 
 		IPage<SysUserEntity> page = this.page(
 			new Query<SysUserEntity>().getPage(params),
 			new QueryWrapper<SysUserEntity>()
+					.in(CollectionUtil.isNotEmpty(userids),"user_id",userids)
 				.like(StringUtils.isNotBlank(username),"username", username)
 				.eq(createUserId != null,"create_user_id", createUserId)
 		);
+		List<SysUserEntity> records = page.getRecords();
+		records.stream().forEach(x->{
+			List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, x.getUserId()).list();
+			List<Long> roleList = list.stream().map(y -> y.getRoleId()).collect(Collectors.toList());
+			if (CollectionUtil.isNotEmpty(list)) {
+				Long roleId = list.get(0).getRoleId();
+				SysRoleEntity one = sysRoleService.lambdaQuery().eq(SysRoleEntity::getRoleId, roleId).one();
+				x.setRoleName(one.getRoleName());
+				x.setRoleIdList(roleList);
+			}
+		});
+		if (StrUtil.isNotEmpty(role)) {
+			if (role.equals("1")) {
+				records = records.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("9"))).collect(Collectors.toList());
+			}
+			if (role.equals("2")) {
+				records = records.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("10"))).collect(Collectors.toList());
+			}
+		}
+		records.stream().forEach(x->{
+			PerformanceEntity one = performanceService.lambdaQuery().eq(PerformanceEntity::getUserId, x.getUserId()).one();
+			if (one != null) {
+				x.setRankage(one.getRankage());
+				x.setExamine(one.getExamine());
+			}
 
+		});
+		List<SysUserEntity> first = records.stream().filter(x -> x.getRankage() != null).sorted(new Comparator<SysUserEntity>() {
+			@Override
+			public int compare(SysUserEntity o1, SysUserEntity o2) {
+				return o1.getRankage() - o2.getRankage();
+			}
+		}).collect(Collectors.toList());
+		List<SysUserEntity> second = records.stream().filter(x -> x.getRankage() == null).collect(Collectors.toList());
+		boolean b = first.addAll(first.size(), second);
+		page.setRecords(first);
 		return new PageUtils(page);
 	}
 
@@ -72,7 +116,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
 	@Override
 	public SysUserEntity queryByUserName(String username) {
-		return baseMapper.queryByUserName(username);
+		SysUserEntity sysUserEntity = baseMapper.queryByUserName(username);
+		List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, sysUserEntity.getUserId()).list();
+		List<Long> roleList = list.stream().map(y -> y.getRoleId()).collect(Collectors.toList());
+		sysUserEntity.setRoleIdList(roleList);
+		return sysUserEntity;
 	}
 
 	@Override

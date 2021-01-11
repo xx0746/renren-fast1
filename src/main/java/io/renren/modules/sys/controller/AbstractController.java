@@ -8,10 +8,13 @@
 
 package io.renren.modules.sys.controller;
 
+import io.renren.modules.performance.entity.PerformanceEntity;
 import io.renren.modules.sys.entity.SysUserEntity;
 import org.apache.shiro.SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * Controller公共组件
@@ -28,4 +31,5 @@ public abstract class AbstractController {
 	protected Long getUserId() {
 		return getUser().getUserId();
 	}
+
 }

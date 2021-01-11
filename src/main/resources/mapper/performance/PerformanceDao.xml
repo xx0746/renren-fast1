@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.performance.dao.PerformanceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="io.renren.modules.performance.entity.PerformanceEntity" id="performanceMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="status" column="status"/>
+        <result property="workload" column="workload"/>
+        <result property="advanced" column="advanced"/>
+        <result property="research" column="research"/>
+        <result property="process" column="process"/>
+        <result property="achievement" column="achievement"/>
+        <result property="evaluation" column="evaluation"/>
+        <result property="knowledge" column="knowledge"/>
+        <result property="cooperation" column="cooperation"/>
+        <result property="learning" column="learning"/>
+        <result property="responsibility" column="responsibility"/>
+        <result property="discipline" column="discipline"/>
+        <result property="behavior" column="behavior"/>
+        <result property="examine" column="examine"/>
+        <result property="rankage" column="rankage"/>
+        <result property="coefficient" column="coefficient"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="checkUserId" column="check_user_id"/>
+    </resultMap>
+
+
+</mapper>
