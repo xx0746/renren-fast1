@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
  * 职能部门员工绩效考核评分
  * 
- * @author chenshun
+ * @author xiexiang
  * @email sunlightcs@gmail.com
  * @date 2020-12-24 17:48:16
  */

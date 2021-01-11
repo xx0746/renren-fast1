@@ -13,7 +13,7 @@ import lombok.Data;
 /**
  * 科研中心员工绩效考核评分表
  * 
- * @author chenshun
+ * @author xiexiang
  * @email sunlightcs@gmail.com
  * @date 2020-12-24 10:24:28
  */
