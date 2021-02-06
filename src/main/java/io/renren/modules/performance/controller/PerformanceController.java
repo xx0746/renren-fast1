@@ -7,8 +7,7 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.EasyExcel;
-import io.renren.common.utils.PerformanceListener;
-import io.renren.common.utils.SysUserListener;
+import io.renren.common.utils.*;
 import io.renren.modules.performance.entity.PerformanceDoctorEntity;
 import io.renren.modules.performance.entity.PerformanceFunctionEntity;
 import io.renren.modules.performance.service.PerformanceDoctorService;
@@ -25,8 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import io.renren.modules.performance.entity.PerformanceEntity;
 import io.renren.modules.performance.service.PerformanceService;
-import io.renren.common.utils.PageUtils;
-import io.renren.common.utils.R;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * 科研中心员工绩效考核评分表
  *
- * @author xiexiang
+ * @author chenshun
  * @email sunlightcs@gmail.com
  * @date 2020-12-24 10:24:28
  */
@@ -55,6 +52,9 @@ public class PerformanceController extends AbstractController {
     @Autowired
     private SysUserRoleService userRoleService;
 
+
+    @Autowired
+    private SysUserRoleService sysUserRoleService;
     /**
      * 列表
      */
@@ -238,14 +238,77 @@ public class PerformanceController extends AbstractController {
      * 导出模板
      */
     @GetMapping("/export")
-    public void export(HttpServletResponse response) throws IOException {
+    public void export(String date,
+            HttpServletResponse response) throws IOException {
+        System.out.println(date);
         ArrayList<PerformanceEntity> performanceEntities = new ArrayList<>();
+        SysUserEntity user = getUser();
+        HashMap<String, Object> params = new HashMap<>();
+        List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, user.getUserId()).list();
+        List<Long> roleIdList = list.stream().map(x -> x.getRoleId()).collect(Collectors.toList());
+        if (CollectionUtil.isEmpty(roleIdList)) {
+
+        }else if (roleIdList.contains(new Long("2"))) {
+            List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 10).list();
+            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            if (getUserId() != Constant.SUPER_ADMIN) {
+                params.put("userIds", userIds);
+            }
+        }else if (roleIdList.contains(new Long("11"))) {
+            List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 12).list();
+            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            if (getUserId() != Constant.SUPER_ADMIN) {
+                params.put("userIds", userIds);
+            }
+        }
+        else if (roleIdList.contains(new Long("13"))) {
+            List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 14).list();
+            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            if (getUserId() != Constant.SUPER_ADMIN) {
+                params.put("userIds", userIds);
+            }
+        }
+       else if (roleIdList.contains(new Long("15"))) {
+            List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 16).list();
+            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            if (getUserId() != Constant.SUPER_ADMIN) {
+                params.put("userIds", userIds);
+            }
+        }
+        else if (roleIdList.contains(new Long("17"))) {
+            List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 18).list();
+            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            if (getUserId() != Constant.SUPER_ADMIN) {
+                params.put("userIds", userIds);
+            }
+        }else if (roleIdList.contains(new Long("19"))) {
+            List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 20).list();
+            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            if (getUserId() != Constant.SUPER_ADMIN) {
+                params.put("userIds", userIds);
+            }
+        }
+       else if (roleIdList.contains(new Long("21"))) {
+            List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 22).list();
+            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            if (getUserId() != Constant.SUPER_ADMIN) {
+                params.put("userIds", userIds);
+            }
+        }
+        List userids = (ArrayList)params.get("userIds");
+        List<PerformanceEntity> record = performanceService.lambdaQuery()
+                .in(CollectionUtil.isNotEmpty(userids), PerformanceEntity::getUserId, userids)
+                .like(date != null, PerformanceEntity::getCreateTime, date).list();
+        record.stream().forEach(x->{
+            SysUserEntity one = userService.lambdaQuery().eq(SysUserEntity::getUserId, x.getUserId()).one();
+            x.setUserName(one.getUsername());
+        });
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
         // 这里URLEncoder.encode可以防止中文乱码 当然和easyexcel没有关系
-        String fileName = URLEncoder.encode("业绩审核模板", "UTF-8");
+        String fileName = URLEncoder.encode("业绩审核模板"+date, "UTF-8");
         response.setHeader("Content-disposition", "attachment;filename=" + fileName + ".xlsx");
-        EasyExcel.write(response.getOutputStream(), PerformanceEntity.class).sheet("模板").doWrite(performanceEntities);
+        EasyExcel.write(response.getOutputStream(), PerformanceEntity.class).sheet("模板").doWrite(record);
     }
     /**
      * 上传用户信息

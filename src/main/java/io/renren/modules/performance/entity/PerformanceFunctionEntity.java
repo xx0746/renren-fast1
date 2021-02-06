@@ -13,7 +13,7 @@ import lombok.Data;
 /**
  * 职能部门员工绩效考核评分
  * 
- * @author xiexiang
+ * @author chenshun
  * @email sunlightcs@gmail.com
  * @date 2020-12-24 17:48:16
  */
@@ -33,6 +33,10 @@ public class PerformanceFunctionEntity implements Serializable {
 	 */
 	@ExcelIgnore
 	private Long userId;
+	/**
+	 * 姓名
+	 */
+	private String name;
 	/**
 	 * 用户名
 	 */

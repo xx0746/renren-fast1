@@ -8,9 +8,15 @@
 
 package io.renren.config;
 
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import org.apache.ibatis.reflection.MetaObject;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * mybatis-plus配置
@@ -18,7 +24,8 @@ import org.springframework.context.annotation.Configuration;
  * @author Mark sunlightcs@gmail.com
  */
 @Configuration
-public class MybatisPlusConfig {
+@MapperScan(basePackages = {"io.renren.modules.*.mapper","io.renren.modules.*.dao"})
+public class MybatisPlusConfig implements MetaObjectHandler {
 
     /**
      * 分页插件
@@ -26,6 +33,21 @@ public class MybatisPlusConfig {
     @Bean
     public PaginationInterceptor paginationInterceptor() {
         return new PaginationInterceptor();
+    }
+
+
+
+    /**
+     * 自动填充
+     */
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        //this.setFieldValByName("createTime",new SimpleDateFormat("yyyy-MM-dd").format(new Date()),metaObject);
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+
     }
 
 }

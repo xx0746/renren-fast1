@@ -43,6 +43,8 @@ public class SysMenuController extends AbstractController {
 	public R nav(){
 		List<SysMenuEntity> menuList = sysMenuService.getUserMenuList(getUserId());
 		Set<String> permissions = shiroService.getUserPermissions(getUserId());
+		System.out.println("权限信息列表"+permissions);
+		System.out.println("菜单列表"+menuList);
 		return R.ok().put("menuList", menuList).put("permissions", permissions);
 	}
 	
@@ -59,7 +61,7 @@ public class SysMenuController extends AbstractController {
 				sysMenuEntity.setParentName(parentMenuEntity.getName());
 			}
 		}
-
+		System.out.println("所有菜单列表"+menuList);
 		return menuList;
 	}
 	

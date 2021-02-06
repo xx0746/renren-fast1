@@ -11,7 +11,7 @@ import lombok.Data;
 /**
  * 专家博士绩效考核
  * 
- * @author xiexiang
+ * @author chenshun
  * @email sunlightcs@gmail.com
  * @date 2020-12-24 17:48:16
  */
@@ -29,6 +29,10 @@ public class PerformanceDoctorEntity implements Serializable {
 	 * 用户ID
 	 */
 	private Long userId;
+	/**
+	 * 姓名
+	 */
+	private String name;
 	/**
 	 * 创建时间
 	 */

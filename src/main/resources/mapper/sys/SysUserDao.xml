@@ -21,4 +21,41 @@
 		select * from sys_user where username = #{username}
 	</select>
 
+	<select id="selectUserInfoWithPage" resultType="io.renren.modules.sys.entity.SysUserEntity">
+		select *
+		from sys_user as user
+		left join sys_user_role as userRole on  user.user_id = userRole.user_id
+		left join sys_role as role on userRole.role_id = role.role_id
+		<where>
+			<if test="username != null">
+				user.username like #{username}
+			</if>
+			<if test="date != null">
+				and DATE_FORMAT(user.create_time,'%Y-%m') = DATE_FORMAT(#{date},'%Y-%m')
+			</if>
+			<if test="department != null">
+				and role.role_name like #{department}
+			</if>
+		</where>
+		limit #{startIndex},#{pageSize}
+	</select>
+
+	<select id="selectCountWithCondition" resultType="java.lang.Integer">
+		select count(*)
+		from sys_user as user
+		left join sys_user_role as userRole on  user.user_id = userRole.user_id
+		left join sys_role as role on userRole.role_id = role.role_id
+		<where>
+			<if test="username != null">
+				user.username like #{username}
+			</if>
+			<if test="date != null">
+				and DATE_FORMAT(user.create_time,'%Y-%m') = DATE_FORMAT(#{date},'%Y-%m')
+			</if>
+			<if test="department != null">
+				and role.role_name like #{department}
+			</if>
+		</where>
+	</select>
+
 </mapper>
