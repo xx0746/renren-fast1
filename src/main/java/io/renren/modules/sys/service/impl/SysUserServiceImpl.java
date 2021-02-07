@@ -12,7 +12,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.renren.common.exception.RRException;
 import io.renren.common.utils.Constant;
@@ -54,47 +53,42 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 
 	@Override
 	public PageUtils queryPage(Map<String, Object> params) {
-		String username = (String)params.get("key");
+		String username = (String)params.get("username");
 		String key = (String)params.get("key");
 		String date = (String)params.get("date");
-		String department = (String)params.get("department");
 		Long createUserId = (Long)params.get("createUserId");
 		String role = (String)params.get("role");
-		Integer current = Integer.parseInt((String)params.get("page"));
-		Integer pageSize = Integer.parseInt((String)params.get("limit"));
 		List userids = (ArrayList)params.get("userIds");
 
-		List<SysUserEntity> userInfos = baseMapper.selectUserInfoWithPage(current,pageSize,"%"+username+"%",date,"%"+department+"%");
-
-//		IPage<SysUserEntity> page = this.page(
-//			new Query<SysUserEntity>().getPage(params),
-//			new QueryWrapper<SysUserEntity>()
-//				.in(CollectionUtil.isNotEmpty(userids),"user_id",userids)
-//				.like(StringUtils.isNotBlank(username),"username", username)
-//				.like(StringUtils.isNotBlank(key),"username", key)
-//				.like(StringUtils.isNotBlank(date),"create_time", date)
-//				.eq(createUserId != null,"create_user_id", createUserId)
-//		);
-		//List<SysUserEntity> records = page.getRecords();
-//		records.stream().forEach(x->{
-//			List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, x.getUserId()).list();
-//			List<Long> roleList = list.stream().map(y -> y.getRoleId()).collect(Collectors.toList());
-//			if (CollectionUtil.isNotEmpty(list)) {
-//				Long roleId = list.get(0).getRoleId();
-//				SysRoleEntity one = sysRoleService.lambdaQuery().eq(SysRoleEntity::getRoleId, roleId).one();
-//				x.setRoleName(one.getRoleName());
-//				x.setRoleIdList(roleList);
-//			}
-//		});
+		IPage<SysUserEntity> page = this.page(
+				new Query<SysUserEntity>().getPage(params),
+				new QueryWrapper<SysUserEntity>()
+						.in(CollectionUtil.isNotEmpty(userids),"user_id",userids)
+						.like(StringUtils.isNotBlank(username),"username", username)
+						.like(StringUtils.isNotBlank(key),"username", key)
+						.like(StringUtils.isNotBlank(date),"create_time", date)
+						.eq(createUserId != null,"create_user_id", createUserId)
+		);
+		List<SysUserEntity> records = page.getRecords();
+		records.stream().forEach(x->{
+			List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, x.getUserId()).list();
+			List<Long> roleList = list.stream().map(y -> y.getRoleId()).collect(Collectors.toList());
+			if (CollectionUtil.isNotEmpty(list)) {
+				Long roleId = list.get(0).getRoleId();
+				SysRoleEntity one = sysRoleService.lambdaQuery().eq(SysRoleEntity::getRoleId, roleId).one();
+				x.setRoleName(one.getRoleName());
+				x.setRoleIdList(roleList);
+			}
+		});
 		if (StrUtil.isNotEmpty(role)) {
 			if (role.equals("1")) {
-				userInfos = userInfos.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("9"))).collect(Collectors.toList());
+				records = records.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("9"))).collect(Collectors.toList());
 			}
 			if (role.equals("2")) {
-				userInfos = userInfos.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("10"))).collect(Collectors.toList());
+				records = records.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("10"))).collect(Collectors.toList());
 			}
 		}
-		userInfos.stream().forEach(x->{
+		records.stream().forEach(x->{
 			PerformanceEntity one = performanceService.lambdaQuery().eq(PerformanceEntity::getUserId, x.getUserId()).one();
 			if (one != null) {
 				x.setRankage(one.getRankage());
@@ -102,23 +96,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 			}
 
 		});
-		List<SysUserEntity> first = userInfos.stream().filter(x -> x.getRankage() != null).sorted(new Comparator<SysUserEntity>() {
+		List<SysUserEntity> first = records.stream().filter(x -> x.getRankage() != null).sorted(new Comparator<SysUserEntity>() {
 			@Override
 			public int compare(SysUserEntity o1, SysUserEntity o2) {
 				return o1.getRankage() - o2.getRankage();
 			}
 		}).collect(Collectors.toList());
-		List<SysUserEntity> second = userInfos.stream().filter(x -> x.getRankage() == null).collect(Collectors.toList());
+		List<SysUserEntity> second = records.stream().filter(x -> x.getRankage() == null).collect(Collectors.toList());
 		boolean b = first.addAll(first.size(), second);
-
-		Page<SysUserEntity> page = new Page<>();
-
-		page.setRecords(userInfos);
-		page.setCurrent(Integer.parseInt((String)params.get("page")));
-		//查询总条目数
-		Integer total = baseMapper.selectCountWithCondition("%"+username+"%",date,"%"+department+"%");
-		page.setTotal(total);
-		page.setSize(Integer.parseInt((String)params.get("limit")));
+		page.setRecords(first);
 		return new PageUtils(page);
 	}
 
@@ -150,10 +136,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 		user.setPassword(new Sha256Hash(user.getPassword(), salt).toHex());
 		user.setSalt(salt);
 		this.save(user);
-		
+
 		//检查角色是否越权
 		checkRole(user);
-		
+
 		//保存用户与角色关系
 		sysUserRoleService.saveOrUpdate(user.getUserId(), user.getRoleIdList());
 	}
@@ -167,10 +153,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 			user.setPassword(new Sha256Hash(user.getPassword(), user.getSalt()).toHex());
 		}
 		this.updateById(user);
-		
+
 		//检查角色是否越权
 		checkRole(user);
-		
+
 		//保存用户与角色关系
 		sysUserRoleService.saveOrUpdate(user.getUserId(), user.getRoleIdList());
 	}
@@ -187,7 +173,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 		return this.update(userEntity,
 				new QueryWrapper<SysUserEntity>().eq("user_id", userId).eq("password", password));
 	}
-	
+
 	/**
 	 * 检查角色是否越权
 	 */
@@ -199,7 +185,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 		if(user.getCreateUserId() == Constant.SUPER_ADMIN){
 			return ;
 		}
-		
+
 		//查询用户创建的角色列表
 		List<Long> roleIdList = sysRoleService.queryRoleIdList(user.getCreateUserId());
 
