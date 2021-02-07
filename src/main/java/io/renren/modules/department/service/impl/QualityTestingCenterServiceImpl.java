@@ -36,7 +36,7 @@ public class QualityTestingCenterServiceImpl extends ServiceImpl<QualityTestingC
         QueryWrapper<QualityTestingCenter> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(commentVO.getName()),"name",commentVO.getName())
                 .like(StringUtils.isNotEmpty(commentVO.getCreateTime()),"create_time",commentVO.getCreateTime())
-                .orderByAsc("sortId");
+                .orderByAsc("sortId+0");
         Page<QualityTestingCenter> qualityTestingPage = baseMapper.selectPage(page, wrapper);
         qualityTestingPage.getRecords().sort((o1, o2) -> {
             return Integer.parseInt(o1.getSortId()) - Integer.parseInt(o2.getSortId());

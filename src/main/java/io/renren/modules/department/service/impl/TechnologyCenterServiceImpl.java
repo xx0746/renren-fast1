@@ -36,7 +36,7 @@ public class TechnologyCenterServiceImpl extends ServiceImpl<TechnologyCenterMap
         QueryWrapper<TechnologyCenter> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(commentVO.getName()),"name",commentVO.getName())
                 .like(StringUtils.isNotEmpty(commentVO.getCreateTime()),"create_time",commentVO.getCreateTime())
-                .orderByAsc("sortId");
+                .orderByAsc("sortId+0");
         Page<TechnologyCenter> technologyPage = baseMapper.selectPage(page, wrapper);
         technologyPage.getRecords().sort((o1, o2) -> {
             return Integer.parseInt(o1.getSortId()) - Integer.parseInt(o2.getSortId());
@@ -59,7 +59,7 @@ public class TechnologyCenterServiceImpl extends ServiceImpl<TechnologyCenterMap
         //设置字符编码
         response.setCharacterEncoding("utf-8");
         //设置类容描述,也就是文件名
-        String fileName = UUID.randomUUID().toString()+".xlsx";
+        String fileName = "TechonologyCenter"+".xlsx";
         response.setHeader("Content-disposition","attachment;filename="+fileName);
         //向浏览器写入数据
         try {

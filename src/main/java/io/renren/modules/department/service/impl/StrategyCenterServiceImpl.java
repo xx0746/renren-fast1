@@ -36,7 +36,7 @@ public class StrategyCenterServiceImpl extends ServiceImpl<StrategyCenterMapper,
         QueryWrapper<StrategyCenter> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(commentVO.getName()),"name",commentVO.getName())
                 .like(StringUtils.isNotEmpty(commentVO.getCreateTime()),"create_time",commentVO.getCreateTime())
-                .orderByAsc("sortId");
+                .orderByAsc("sortId+0");
         Page<StrategyCenter> strategyPage = baseMapper.selectPage(page, wrapper);
         strategyPage.getRecords().sort((o1, o2) -> {
             return Integer.parseInt(o1.getSortId()) - Integer.parseInt(o2.getSortId());
