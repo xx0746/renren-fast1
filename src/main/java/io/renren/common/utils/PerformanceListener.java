@@ -86,10 +86,10 @@ public class PerformanceListener extends AnalysisEventListener<PerformanceEntity
                 if (one == null) {
                     break;
                 }
-//                PerformanceEntity one1 = performanceService.lambdaQuery().eq(PerformanceEntity::getUserId, one.getUserId()).one();
-//                if (one1 != null) {
-//                    break;
-//                }
+                PerformanceEntity one1 = performanceService.lambdaQuery().eq(PerformanceEntity::getUserId, one.getUserId()).one();
+                if (one1 != null) {
+                    break;
+                }
                 if (CollectionUtil.isEmpty(one.getRoleIdList())) {
                     break;
                 }

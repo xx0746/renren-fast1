@@ -35,7 +35,7 @@ public class PerformanceFunctionServiceImpl extends ServiceImpl<PerformanceFunct
 
         );
         List<PerformanceFunctionEntity> records = page.getRecords();
-        records.stream().forEach(x->{
+        records.forEach(x->{
             SysUserEntity one = userService.lambdaQuery().eq(SysUserEntity::getUserId, x.getUserId()).one();
             x.setUserName(one.getUsername());
         });

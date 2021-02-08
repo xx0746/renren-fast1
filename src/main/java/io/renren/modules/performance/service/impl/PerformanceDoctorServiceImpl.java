@@ -27,7 +27,6 @@ public class PerformanceDoctorServiceImpl extends ServiceImpl<PerformanceDoctorD
     private SysUserService userService;
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
-        String date = (String) params.get("date");
         String status = (String)params.get("status");
         Long userId = (Long)params.get("userId");
         IPage<PerformanceDoctorEntity> page = this.page(
@@ -35,7 +34,6 @@ public class PerformanceDoctorServiceImpl extends ServiceImpl<PerformanceDoctorD
                 new QueryWrapper<PerformanceDoctorEntity>()
                 .eq(StrUtil.isNotEmpty(status),"status",status)
                 .eq(userId!=null,"user_id",userId)
-                .like(StrUtil.isNotBlank(date),"create_time",date)
         );
         List<PerformanceDoctorEntity> records = page.getRecords();
         records.stream().forEach(x->{

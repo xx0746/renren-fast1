@@ -37,8 +37,8 @@ public class PerformanceServiceImpl extends ServiceImpl<PerformanceDao, Performa
         IPage<PerformanceEntity> page = this.page(
                 new Query<PerformanceEntity>().getPage(params),
                 new QueryWrapper<PerformanceEntity>()
-                .eq(userId!=null,"user_id",userId)
-                .eq(status!=null,"status",status)
+                        .eq(userId!=null,"user_id",userId)
+                        .eq(status!=null,"status",status)
         );
 
         return new PageUtils(page);

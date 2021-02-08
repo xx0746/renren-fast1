@@ -34,10 +34,6 @@ public class PerformanceFunctionEntity implements Serializable {
 	@ExcelIgnore
 	private Long userId;
 	/**
-	 * 姓名
-	 */
-	private String name;
-	/**
 	 * 用户名
 	 */
 	@TableField(exist=false)

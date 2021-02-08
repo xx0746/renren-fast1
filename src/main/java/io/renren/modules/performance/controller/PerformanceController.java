@@ -90,7 +90,7 @@ public class PerformanceController extends AbstractController {
         List<Long> roleIdList = userRoleService.queryRoleIdList(userId);
         if (roleIdList.contains(Long.parseLong("5"))) {
             List<SysUserRoleEntity> list = userRoleService.lambdaQuery().eq(SysUserRoleEntity::getRoleId, 1).list();
-            List<Long> useIds = list.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> useIds = list.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             PageUtils page = performanceService.queryPageByIds(useIds);
             return R.ok().put("page", page);
         }
@@ -149,7 +149,7 @@ public class PerformanceController extends AbstractController {
     public R save(@RequestBody PerformanceEntity performance){
         performance.setCreateTime(new Date());
         performance.setStatus(1);
-		performanceService.save(performance);
+        performanceService.save(performance);
         performanceService.autorange();
         return R.ok();
     }
@@ -160,7 +160,7 @@ public class PerformanceController extends AbstractController {
     @RequestMapping("/update")
     @RequiresPermissions("sys:performance:update")
     public R update(@RequestBody PerformanceEntity performance){
-		performanceService.updateById(performance);
+        performanceService.updateById(performance);
         performanceService.autorange();
         return R.ok();
     }
@@ -197,7 +197,7 @@ public class PerformanceController extends AbstractController {
     @RequestMapping("/rlshenhe/{id}/{status}")
     @RequiresPermissions("sys:performance:rlshenhe")
     public R rlshenhe(@PathVariable("id") Long id,
-                    @PathVariable("status") Integer status){
+                      @PathVariable("status") Integer status){
         performanceService.lambdaUpdate().set(PerformanceEntity::getStatus, status).
                 set(PerformanceEntity::getCheckUserId, getUserId()).eq(PerformanceEntity::getId, id).update();
         return R.ok();
@@ -208,7 +208,7 @@ public class PerformanceController extends AbstractController {
     @RequestMapping("/yuanshenhe/{id}/{status}")
     @RequiresPermissions("sys:performance:yuanshenhe")
     public R yuanshenhe(@PathVariable("id") Long id,
-                      @PathVariable("status") Integer status){
+                        @PathVariable("status") Integer status){
         performanceService.lambdaUpdate().set(PerformanceEntity::getStatus, status).
                 set(PerformanceEntity::getCheckUserId, getUserId()).eq(PerformanceEntity::getId, id).update();
         return R.ok();
@@ -229,7 +229,7 @@ public class PerformanceController extends AbstractController {
     @RequestMapping("/delete")
     @RequiresPermissions("sys:performance:delete")
     public R delete(@RequestBody Long[] ids){
-		performanceService.removeByIds(Arrays.asList(ids));
+        performanceService.removeByIds(Arrays.asList(ids));
 
         return R.ok();
     }
@@ -239,58 +239,58 @@ public class PerformanceController extends AbstractController {
      */
     @GetMapping("/export")
     public void export(String date,
-            HttpServletResponse response) throws IOException {
+                       HttpServletResponse response) throws IOException {
         System.out.println(date);
         ArrayList<PerformanceEntity> performanceEntities = new ArrayList<>();
         SysUserEntity user = getUser();
         HashMap<String, Object> params = new HashMap<>();
         List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, user.getUserId()).list();
-        List<Long> roleIdList = list.stream().map(x -> x.getRoleId()).collect(Collectors.toList());
+        List<Long> roleIdList = list.stream().map(SysUserRoleEntity::getRoleId).collect(Collectors.toList());
         if (CollectionUtil.isEmpty(roleIdList)) {
 
         }else if (roleIdList.contains(new Long("2"))) {
             List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 10).list();
-            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> userIds = list1.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             if (getUserId() != Constant.SUPER_ADMIN) {
                 params.put("userIds", userIds);
             }
         }else if (roleIdList.contains(new Long("11"))) {
             List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 12).list();
-            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> userIds = list1.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             if (getUserId() != Constant.SUPER_ADMIN) {
                 params.put("userIds", userIds);
             }
         }
         else if (roleIdList.contains(new Long("13"))) {
             List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 14).list();
-            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> userIds = list1.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             if (getUserId() != Constant.SUPER_ADMIN) {
                 params.put("userIds", userIds);
             }
         }
-       else if (roleIdList.contains(new Long("15"))) {
+        else if (roleIdList.contains(new Long("15"))) {
             List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 16).list();
-            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> userIds = list1.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             if (getUserId() != Constant.SUPER_ADMIN) {
                 params.put("userIds", userIds);
             }
         }
         else if (roleIdList.contains(new Long("17"))) {
             List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 18).list();
-            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> userIds = list1.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             if (getUserId() != Constant.SUPER_ADMIN) {
                 params.put("userIds", userIds);
             }
         }else if (roleIdList.contains(new Long("19"))) {
             List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 20).list();
-            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> userIds = list1.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             if (getUserId() != Constant.SUPER_ADMIN) {
                 params.put("userIds", userIds);
             }
         }
-       else if (roleIdList.contains(new Long("21"))) {
+        else if (roleIdList.contains(new Long("21"))) {
             List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 22).list();
-            List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
+            List<Long> userIds = list1.stream().map(SysUserRoleEntity::getUserId).collect(Collectors.toList());
             if (getUserId() != Constant.SUPER_ADMIN) {
                 params.put("userIds", userIds);
             }
@@ -299,7 +299,7 @@ public class PerformanceController extends AbstractController {
         List<PerformanceEntity> record = performanceService.lambdaQuery()
                 .in(CollectionUtil.isNotEmpty(userids), PerformanceEntity::getUserId, userids)
                 .like(date != null, PerformanceEntity::getCreateTime, date).list();
-        record.stream().forEach(x->{
+        record.forEach(x->{
             SysUserEntity one = userService.lambdaQuery().eq(SysUserEntity::getUserId, x.getUserId()).one();
             x.setUserName(one.getUsername());
         });

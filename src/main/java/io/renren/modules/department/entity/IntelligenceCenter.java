@@ -71,8 +71,8 @@ public class IntelligenceCenter implements Serializable {
     private String knowledgeSkills;
 
     @ApiModelProperty(value = "沟通协作")
-    @TableField("Communication_collaboration 4%")
-    @ExcelProperty(index = 9,value = "沟通协作")
+    @TableField("Communication_collaboration")
+    @ExcelProperty(index = 9,value = "沟通协作 4%")
     private String communicationCollaboration;
 
     @ApiModelProperty(value = "学习创新")

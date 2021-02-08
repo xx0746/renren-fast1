@@ -12,7 +12,7 @@ import lombok.Data;
 
 /**
  * 科研中心员工绩效考核评分表
- * 
+ *
  * @author chenshun
  * @email sunlightcs@gmail.com
  * @date 2020-12-24 10:24:28
@@ -23,7 +23,7 @@ public class PerformanceEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 
+	 *
 	 */
 	@TableId
 	@ExcelIgnore

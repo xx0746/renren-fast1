@@ -11,7 +11,6 @@ package io.renren.modules.sys.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import io.renren.modules.sys.entity.SysUserEntity;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -39,7 +38,4 @@ public interface SysUserDao extends BaseMapper<SysUserEntity> {
 	 */
 	SysUserEntity queryByUserName(String username);
 
-	List<SysUserEntity> selectUserInfoWithPage(@Param("startIndex") int i,@Param("pageSize") int i1,@Param("username") String username,@Param("date") String date,@Param("department") String department);
-
-    Integer selectCountWithCondition(@Param("username") String s,@Param("date") String date,@Param("department") String s1);
 }

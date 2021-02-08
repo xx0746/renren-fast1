@@ -63,7 +63,7 @@ public class PerformanceFunctionController extends AbstractController {
     public R mylist(@RequestParam Map<String, Object> params){
         Long userId = getUserId();
         List<SysUserRoleEntity> list = userRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, userId).list();
-        List<Long> roles = list.stream().map(x -> x.getRoleId()).collect(Collectors.toList());
+        List<Long> roles = list.stream().map(SysUserRoleEntity::getRoleId).collect(Collectors.toList());
         System.out.println(list);
         if (roles.contains(Long.parseLong("4"))) {
 

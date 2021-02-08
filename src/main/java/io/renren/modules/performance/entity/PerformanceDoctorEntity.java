@@ -30,10 +30,6 @@ public class PerformanceDoctorEntity implements Serializable {
 	 */
 	private Long userId;
 	/**
-	 * 姓名
-	 */
-	private String name;
-	/**
 	 * 创建时间
 	 */
 	private Date createTime;
