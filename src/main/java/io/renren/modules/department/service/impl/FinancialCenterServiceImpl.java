@@ -49,7 +49,7 @@ public class FinancialCenterServiceImpl extends ServiceImpl<FinancialCenterMappe
         QueryWrapper<FinancialCenter> wrapper = new QueryWrapper<>();
         wrapper.like(StringUtils.isNotEmpty(commentVO.getName()),"name",commentVO.getName())
                 .like(StringUtils.isNotEmpty(commentVO.getCreateTime()),"create_time",commentVO.getCreateTime())
-                .orderByAsc("sortId");
+                .orderByAsc("sortId+0");
         List<FinancialCenter> financialList = baseMapper.selectList(wrapper);
         //通过查询出来的数据写到浏览器
 
