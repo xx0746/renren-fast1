@@ -18,7 +18,7 @@ import java.util.UUID;
 
 /**
  * <p>
- * 设计中心 服务实现类
+ * 职能中心 服务实现类
  * </p>
  *
  * @author java

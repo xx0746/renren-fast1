@@ -3,6 +3,7 @@ package io.renren.modules.performance.service.impl;
 import cn.hutool.core.util.StrUtil;
 import io.renren.modules.sys.entity.SysUserEntity;
 import io.renren.modules.sys.service.SysUserService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +30,13 @@ public class PerformanceDoctorServiceImpl extends ServiceImpl<PerformanceDoctorD
     public PageUtils queryPage(Map<String, Object> params) {
         String status = (String)params.get("status");
         Long userId = (Long)params.get("userId");
+        String date = (String)params.get("date");
         IPage<PerformanceDoctorEntity> page = this.page(
                 new Query<PerformanceDoctorEntity>().getPage(params),
                 new QueryWrapper<PerformanceDoctorEntity>()
                 .eq(StrUtil.isNotEmpty(status),"status",status)
                 .eq(userId!=null,"user_id",userId)
+                .like(StringUtils.isNotBlank(date), "create_time", date)
         );
         List<PerformanceDoctorEntity> records = page.getRecords();
         records.stream().forEach(x->{
