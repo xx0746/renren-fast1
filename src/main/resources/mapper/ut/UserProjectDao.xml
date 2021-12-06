@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.ut.dao.UserProjectDao">
+
+    <select id="personList" resultType="io.renren.modules.ut.VO.UserProjectVO">
+        select a.user_id as userId,b.username as name, a.ut
+        from user_project a
+        left join sys_user b on a.user_id = b.user_id
+        where a.project_id = ${projectId}
+            limit ${start},${size}
+    </select>
+</mapper>

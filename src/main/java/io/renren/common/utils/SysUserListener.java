@@ -2,14 +2,19 @@ package io.renren.common.utils;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.renren.modules.sys.dao.SysUserDao;
+import io.renren.modules.sys.entity.SysDepartmentEntity;
+import io.renren.modules.sys.entity.SysRoleEntity;
 import io.renren.modules.sys.entity.SysUserEntity;
+import io.renren.modules.sys.service.SysDepartmentService;
+import io.renren.modules.sys.service.SysRoleService;
 import io.renren.modules.sys.service.SysUserRoleService;
 import io.renren.modules.sys.service.SysUserService;
+import org.apache.commons.lang.StringUtils;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 // 有个很重要的点 DemoDataListener 不能被spring管理，要每次读取excel都要new,然后里面用到spring可以构造方法传进去
 public class SysUserListener extends AnalysisEventListener<SysUserEntity> {
@@ -27,6 +32,8 @@ public class SysUserListener extends AnalysisEventListener<SysUserEntity> {
      * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
      */
     private SysUserService sysUserService;
+    private SysDepartmentService sysDepartmentService;
+    private SysRoleService sysRoleService;
 
     public SysUserListener() {
 
@@ -37,8 +44,10 @@ public class SysUserListener extends AnalysisEventListener<SysUserEntity> {
      * 不要使用自动装配
      * 在测试类中将dao当参数传进来
      */
-    public SysUserListener(SysUserService sysUserService) {
+    public SysUserListener(SysUserService sysUserService, SysDepartmentService sysDepartmentService,SysRoleService sysRoleService) {
         this.sysUserService = sysUserService;
+        this.sysDepartmentService = sysDepartmentService;
+        this.sysRoleService = sysRoleService;
     }
 
     /**
@@ -47,7 +56,32 @@ public class SysUserListener extends AnalysisEventListener<SysUserEntity> {
      */
     @Override
     public void invoke(SysUserEntity userEntity, AnalysisContext context) {
-
+        userEntity.setCreateUserId((long)Constant.SUPER_ADMIN);
+        String departmentName = userEntity.getDepartmentName();
+        if(departmentName!=null && !departmentName.equals("")){
+            Map<String,Object> params = new HashMap<>();
+            params.put("departmentName",departmentName);
+            Map<String,Object> result = sysDepartmentService.getDepartmentByMap(params);
+            List<SysDepartmentEntity> departList = (List<SysDepartmentEntity>)result.get("dataList");
+            if(departList!=null && departList.size()>0){
+                userEntity.setDepartmentId(departList.get(0).getId());
+            }
+        }
+        List<Long> roleIdList = new ArrayList<>();
+        String roleName = userEntity.getRoleName();
+        if(roleName!=null && !roleName.equals("")){
+            String[] roleNames = roleName.split(",");
+            for(String role : roleNames){
+                List<SysRoleEntity> roleList = sysRoleService.list(new QueryWrapper<SysRoleEntity>().like("role_name", role));
+                if(roleList.size()>0){
+                    roleIdList.add(roleList.get(0).getRoleId());
+                }
+            }
+        }
+        if(roleIdList.size()>0){
+            userEntity.setRoleIdList(roleIdList);
+        }
+        userEntity.setCreateTime(new Date());
         list.add(userEntity);
         // 达到BATCH_COUNT了，需要去存储一次数据库，防止数据几万条数据在内存，容易OOM
         if (list.size() >= BATCH_COUNT) {

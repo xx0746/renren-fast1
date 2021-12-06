@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.ut.dao.UserScoreDao">
+	<!-- 查询分数列表 -->
+	<select id="getUserScoreList" parameterType="Map" resultType="Map">
+		select a.user_id userId,a.username,a.department_id departmentId,
+		b.department_name departmentName,
+		COALESCE(c.score,0) AS score,#{param.year} year,#{param.month} month,
+		case when c.score is null then '0' else '1' end isScore
+		from sys_user a
+		left join sys_department b on a.department_id = b.id
+		left join user_score c on a.user_id = c.user_id
+		<if test="param.year != null and param.year != ''">
+			and c.year = #{param.year}
+		</if>
+		<if test="param.month != null and param.month != ''">
+			and c.month = #{param.month}
+		</if>
+		where 1=1
+		<if test="param.departmentId != null and param.departmentId != ''">
+			and a.department_id = #{param.departmentId}
+		</if>
+	</select>
+
+</mapper>

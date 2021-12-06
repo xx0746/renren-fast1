@@ -17,8 +17,6 @@ import io.renren.common.exception.RRException;
 import io.renren.common.utils.Constant;
 import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.Query;
-import io.renren.modules.performance.entity.PerformanceEntity;
-import io.renren.modules.performance.service.PerformanceService;
 import io.renren.modules.sys.dao.SysUserDao;
 import io.renren.modules.sys.entity.SysRoleEntity;
 import io.renren.modules.sys.entity.SysUserEntity;
@@ -26,6 +24,7 @@ import io.renren.modules.sys.entity.SysUserRoleEntity;
 import io.renren.modules.sys.service.SysRoleService;
 import io.renren.modules.sys.service.SysUserRoleService;
 import io.renren.modules.sys.service.SysUserService;
+import net.sf.jsqlparser.expression.operators.relational.OldOracleJoinBinaryExpression;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -40,7 +39,7 @@ import java.util.stream.Collectors;
 /**
  * 系统用户
  *
- * @author Mark sunlightcs@gmail.com
+
  */
 @Service("sysUserService")
 public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> implements SysUserService {
@@ -48,8 +47,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 	private SysUserRoleService sysUserRoleService;
 	@Autowired
 	private SysRoleService sysRoleService;
-	@Autowired
-	private PerformanceService performanceService;
 
 	@Override
 	public PageUtils queryPage(Map<String, Object> params) {
@@ -57,7 +54,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 		String key = (String)params.get("key");
 		String date = (String)params.get("date");
 		Long createUserId = (Long)params.get("createUserId");
-		String role = (String)params.get("role");
 		List userids = (ArrayList)params.get("userIds");
 
 		IPage<SysUserEntity> page = this.page(
@@ -74,27 +70,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 			List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, x.getUserId()).list();
 			List<Long> roleList = list.stream().map(y -> y.getRoleId()).collect(Collectors.toList());
 			if (CollectionUtil.isNotEmpty(list)) {
-				Long roleId = list.get(0).getRoleId();
-				SysRoleEntity one = sysRoleService.lambdaQuery().eq(SysRoleEntity::getRoleId, roleId).one();
-				x.setRoleName(one.getRoleName());
-				x.setRoleIdList(roleList);
+				String roleName = "";
+				for(Long roleId : roleList){
+					SysRoleEntity one = sysRoleService.lambdaQuery().eq(SysRoleEntity::getRoleId, roleId).one();
+					if(roleName.equals("")){
+						roleName = one.getRoleName();
+					}else {
+						roleName+=","+one.getRoleName();
+					}
+				}
+				x.setRoleName(roleName);
 			}
-		});
-		if (StrUtil.isNotEmpty(role)) {
-			if (role.equals("1")) {
-				records = records.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("9"))).collect(Collectors.toList());
-			}
-			if (role.equals("2")) {
-				records = records.stream().filter(x -> x.getRoleIdList().contains(Long.parseLong("10"))).collect(Collectors.toList());
-			}
-		}
-		records.stream().forEach(x->{
-			PerformanceEntity one = performanceService.lambdaQuery().eq(PerformanceEntity::getUserId, x.getUserId()).one();
-			if (one != null) {
-				x.setRankage(one.getRankage());
-				x.setExamine(one.getExamine());
-			}
-
+			x.setRoleIdList(roleList);
 		});
 		List<SysUserEntity> first = records.stream().filter(x -> x.getRankage() != null).sorted(new Comparator<SysUserEntity>() {
 			@Override
@@ -174,11 +161,36 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 				new QueryWrapper<SysUserEntity>().eq("user_id", userId).eq("password", password));
 	}
 
+	@Override
+	public Map<String, Object> userList(Long current, Long size, String userName) {
+		List<SysUserEntity> sysUsers = baseMapper.userList((current-1) * size, size, '%'+userName+'%');
+		Integer total = baseMapper.selectCount(
+				new QueryWrapper<SysUserEntity>()
+						.like("username", userName)
+		);
+		List<Map<String, Object>> dataList = sysUsers.stream().map(entry -> {
+			Map<String, Object> map = new HashMap<>();
+			map.put("userId", entry.getUserId());
+			map.put("userName", entry.getUsername());
+			return map;
+		}).collect(Collectors.toList());
+		Map<String,Object> returnMap = new HashMap<>();
+		returnMap.put("current", current);
+		returnMap.put("size", dataList.size());
+		returnMap.put("total", total);
+		returnMap.put("msg", "success");
+		returnMap.put("code", 0);
+		returnMap.put("dataList", dataList);
+		return returnMap;
+	}
+
+
 	/**
 	 * 检查角色是否越权
 	 */
 	private void checkRole(SysUserEntity user){
-		if(user.getRoleIdList() == null || user.getRoleIdList().size() == 0){
+		return;
+		/*if(user.getRoleIdList() == null || user.getRoleIdList().size() == 0){
 			return;
 		}
 		//如果不是超级管理员，则需要判断用户的角色是否自己创建
@@ -192,6 +204,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 		//判断是否越权
 		if(!roleIdList.containsAll(user.getRoleIdList())){
 			throw new RRException("新增用户所选角色，不是本人创建");
-		}
+		}*/
 	}
 }

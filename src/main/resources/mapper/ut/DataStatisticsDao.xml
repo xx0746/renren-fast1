@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.ut.dao.DataStatisticsDao">
+	<!-- 员工统计列表 -->
+	<select id="userWorkTimeList" parameterType="Map" resultType="Map">
+		select a.user_id,a.year,a.month,sum(ut) monthTime,b.username,
+		b.department_id AS departmentId,c.department_name AS departmentName
+		from ut_write a
+		left join sys_user b on a.user_id = b.user_id
+		left join sys_department c on b.department_id = c.id
+		where a.status = 2
+		<if test="param.year != null and param.year != ''">
+			and a.year = #{param.year}
+		</if>
+		<if test="param.month != null and param.month != ''">
+			and a.month = #{param.month}
+		</if>
+		<if test="param.departmentId != null and param.departmentId != ''">
+			and b.department_id = #{param.departmentId}
+		</if>
+		group by a.user_id,a.year,a.month
+		order by monthTime desc
+		<if test="param.start != null and param.size != null">
+			limit #{param.start},#{param.size}
+		</if>
+	</select>
+	<select id="userWorkTimeCount" parameterType="Map" resultType="Long">
+		select count(*) from (select a.user_id,a.year,a.month
+		from ut_write a
+		left join sys_user b on a.user_id = b.user_id
+		where a.status = 2
+		<if test="param.year != null and param.year != ''">
+			and a.year = #{param.year}
+		</if>
+		<if test="param.month != null and param.month != ''">
+			and a.month = #{param.month}
+		</if>
+		<if test="param.departmentId != null and param.departmentId != ''">
+			and b.department_id = #{param.departmentId}
+		</if>
+		group by a.user_id,a.year,a.month ) a
+	</select>
+	<!-- 项目统计列表 -->
+	<select id="projectWorkTimeList" parameterType="Map" resultType="Map">
+		select  a.id,a.code,a.name,a.ut,
+		COALESCE(b.monthut,0) monthut,
+		COALESCE(c.usedut,0) usedut,
+		a.ut-COALESCE(c.usedut,0) unusedut,
+		a.according,a.start_time startTime,
+		a.level,a.user_name userName,
+		a.department_name departmentName,
+		a.end_time endTime,a.excel_month excelMonth
+		from project a
+		left join (select project_id,sum(ut) monthut from ut_write a
+		where a.status = 2
+		<if test="param.yearMonth != null and param.yearMonth != ''">
+			and a.yearmonth = #{param.yearMonth}
+		</if>
+		group by project_id) b on b.project_id = a.id
+		left join (select project_id,sum(ut) usedut
+		from ut_write a where a.status = 2
+		<if test="param.yearMonth != null and param.yearMonth != ''">
+			and a.yearmonth &lt;= #{param.yearMonth}
+		</if>
+		group by project_id) c on c.project_id = a.id
+		where 1=1
+
+		<if test="param.departmentId != null and param.departmentId != ''">
+			and a.department_id = #{param.departmentId}
+		</if>
+		<if test="param.start != null and param.size != null">
+			limit #{param.start},#{param.size}
+		</if>
+	</select>
+	<select id="projectWorkTimeCount" parameterType="Map" resultType="Long">
+		select count(*) from project a where 1=1
+		<if test="param.departmentId != null and param.departmentId != ''">
+			and a.department_id = #{param.departmentId}
+		</if>
+	</select>
+	<!-- 绩效列表 -->
+	<select id="performanceList" parameterType="Map" resultType="io.renren.modules.ut.VO.PerformanceVO">
+		select a.user_id,b.username,a.ut,a.performance,a.agv_neng_salary,a.agv_ut_salary,
+		c.department_name,d.score,b.level,e.ratio,e.salary_standard,
+		CONCAT(${param.year},'-',${param.month}) as yearMonth
+		from user_performance a
+		left join sys_user b on a.user_id = b.user_id
+		left join sys_department c on a.department_id = c.id
+		left join user_score d on a.user_id =d.user_id
+		<if test="param.year != null and param.year != ''">
+			and d.year = #{param.year}
+		</if>
+		<if test="param.month != null and param.month != ''">
+			and d.month = #{param.month}
+		</if>
+		left join user_level e on b.level = e.level
+		where 1=1
+		<if test="param.year != null and param.year != ''">
+			and a.year = #{param.year}
+		</if>
+		<if test="param.month != null and param.month != ''">
+			and a.month = #{param.month}
+		</if>
+		<if test="param.departmentId != null and param.departmentId != ''">
+			and a.department_id = #{param.departmentId}
+		</if>
+		<if test="param.start != null and param.size != null">
+			limit #{param.start},#{param.size}
+		</if>
+	</select>
+	<select id="performanceCount" parameterType="Map" resultType="Long">
+		select count(*) from user_performance a where 1=1
+		<if test="param.year != null and param.year != ''">
+			and a.year = #{param.year}
+		</if>
+		<if test="param.month != null and param.month != ''">
+			and a.month = #{param.month}
+		</if>
+		<if test="param.departmentId != null and param.departmentId != ''">
+			and a.department_id = #{param.departmentId}
+		</if>
+	</select>
+	<!-- 查询平均工作能力和平均工时绩效 -->
+	<select id="getAgvSalary" parameterType="Map" resultType="io.renren.modules.ut.VO.AgvSalaryVO">
+		select sum(a.salary_standard*a.score) sumNengSalary
+		,sum(a.ut*a.ratio) sumUTSalary
+		,a.salary
+		,a.salary*0.3/sum(a.salary_standard*a.score) agvNengSalary
+		,a.salary*0.7/sum(a.ut*a.ratio) agvUTSalary
+		from (select a.user_id,a.department_id,a.username,a.level,b.ratio,b.salary_standard,c.score
+		,COALESCE(d.ut,0) ut,e.salary from sys_user a
+		left join user_level b on a.level = b.level
+		left join user_score c on a.user_id = c.user_id
+		and c.year=#{param.year} and c.month = #{param.month}
+		left join (select user_id,yearmonth,COALESCE(sum(ut),0) ut from ut_write
+		where yearmonth=#{param.yearmonth} and status = 2 group by user_id,yearmonth) d
+		on a.user_id=d.user_id
+		left join department_salary e on e.department_id = a.department_id
+		and e.yearmonth=#{param.yearmonth}
+		where a.department_id = #{param.departmentId}) a
+	</select>
+	<!-- 查询平均工作能力和平均工时绩效 -->
+	<select id="getUserSalaryDetail" parameterType="Map" resultType="io.renren.modules.ut.VO.UserSalaryDetailVO">
+		select a.user_id userId,a.department_id departmentId,a.username,a.level,b.ratio,
+		b.salary_standard salaryStandard,c.score ,COALESCE(d.ut,0) ut from sys_user a
+		left join user_level b on a.level = b.level
+		left join user_score c on a.user_id = c.user_id
+		and c.year=#{param.year} and c.month = #{param.month}
+		left join (select user_id,yearmonth,COALESCE(sum(ut),0) ut from ut_write
+		where yearmonth=#{param.yearmonth} and status = 2 group by user_id,yearmonth) d
+		on a.user_id=d.user_id where a.department_id = #{param.departmentId}
+	</select>
+</mapper>

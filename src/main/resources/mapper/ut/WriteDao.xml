@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.ut.dao.WriteDao">
+	<select id="writeList" resultType="io.renren.modules.ut.VO.UTWriteVO">
+		select  oneWorkType.id as oneId, oneWorkType.name as oneName,
+		twoWorkType.id as twoId, twoWorkType.name as twoName, utWrite.ut as ut,utWrite.status
+		from ut_write as utWrite left join work_type as oneWorkType
+		on utWrite.one_id = oneWorkType.id
+		left join work_type as twoWorkType
+		on utWrite.two_id = twoWorkType.id
+		where utWrite.user_id = #{userId} and utWrite.year = #{year} and utWrite.month = #{month} and utWrite.week = #{week}
+		and utWrite.project_id = #{projectId}
+		limit #{start}, #{size}
+	</select>
+
+	<select id="writeListCount" resultType="java.lang.Long">
+		select  count(*)
+		from ut_write as utWrite
+		where utWrite.user_id = #{userId} and utWrite.year = #{year}
+		and utWrite.month = #{month} and utWrite.week = #{week}
+		and utWrite.project_id = #{projectId}
+	</select>
+	<select id="writeProjectList" resultType="Map">
+		select a.user_id,a.ut allut,a.project_id projectId,
+		COALESCE(c.usedut,0) usedut,
+		a.ut-COALESCE(c.usedut,0) as unusedut,
+		b.code,
+		b.name,
+		b.according,
+		b.start_time startTime,
+		b.level,
+		b.user_name userName,
+		b.department_name departmentName,
+		b.end_time endTime,
+		b.excel_month excelMonth
+		from user_project a
+		left join project b on a.project_id = b.id
+		left join (select user_id,project_id,COALESCE(sum(ut),0) usedut
+		from ut_write group by user_id,project_id) c
+		on a.user_id = c.user_id and a.project_id = c.project_id
+		where a.user_id = #{userId}
+		limit #{start}, #{size}
+	</select>
+
+	<select id="projectCount" resultType="java.lang.Long">
+		select count(*) from user_project a
+		where a.user_id = #{userId}
+	</select>
+</mapper>

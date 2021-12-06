@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.renren.modules.ut.dao.ApprovalDao">
+    <!-- 项目经理审核项目列表 -->
+    <select id="managerProjectApprovalList" parameterType="Map" resultType="Map">
+        select  a.id,a.code,a.name,a.ut,
+        COALESCE(b.weekut,0) weekut,
+        COALESCE(c.usedut,0) usedut,
+        a.ut-COALESCE(c.usedut,0) unusedut,
+        a.according,a.start_time startTime,
+        a.level,a.user_name userName,
+        a.department_name departmentName,
+        a.end_time endTime,a.excel_month excelMonth
+        from project a
+        left join (select project_id,sum(ut) weekut from ut_write a
+        where 1=1
+        <if test="param.yearMonthWeek != null and param.yearMonthWeek != ''">
+            and a.year_month_week = #{param.yearMonthWeek}
+        </if>
+        group by project_id) b on b.project_id = a.id
+        left join (select project_id,sum(ut) usedut
+        from ut_write a where 1=1
+        <if test="param.yearMonthWeek != null and param.yearMonthWeek != ''">
+            and a.year_month_week &lt;= #{param.yearMonthWeek}
+        </if>
+        group by project_id) c on c.project_id = a.id
+        where 1=1
+        <if test="param.userId != null and param.userId != ''">
+            and a.user_id = #{param.userId}
+        </if>
+        <if test="param.departmentId != null and param.departmentId != ''">
+            and a.department_id = #{param.departmentId}
+        </if>
+        <if test="param.start != null and param.size != null">
+            limit #{param.start},#{param.size}
+        </if>
+    </select>
+    <select id="projectApprovalCount" parameterType="Map" resultType="Long">
+        select count(*) from project a where 1=1
+        <if test="param.userId != null and param.userId != ''">
+            and a.user_id = #{param.userId}
+        </if>
+        <if test="param.departmentId != null and param.departmentId != ''">
+            and a.department_id = #{param.departmentId}
+        </if>
+    </select>
+    <!-- 周工作类型工时列表 -->
+    <select id="managerApprovalWorkTimeList" parameterType="Map" resultType="Map">
+        select a.id,a.one_id oneId,a.two_id twoId,a.user_id userId,a.ut,
+        b.username,c.name oneName,d.name twoName,a.project_id projectId
+        from ut_write a
+        left join sys_user b on a.user_id = b.user_id
+        left join work_type c on c.id = a.one_id
+        left join work_type d on d.id = a.two_id
+        where 1=1
+        <if test="param.yearMonthWeek != null and param.yearMonthWeek != ''">
+            and a.year_month_week = #{param.yearMonthWeek}
+        </if>
+        <if test="param.status != null and param.status != ''">
+            and a.status in ( ${param.status} )
+        </if>
+        <if test="param.projectId != null and param.projectId != ''">
+            and a.project_id = #{param.projectId}
+        </if>
+    </select>
+    <!-- 领导审核项目列表 -->
+    <select id="leaderProjectApprovalList" parameterType="Map" resultType="Map">
+        select  a.id,a.code,a.name,a.ut,
+        COALESCE(b.monthut,0) monthut,
+        COALESCE(c.usedut,0) usedut,
+        a.ut-COALESCE(c.usedut,0) unusedut,
+        a.according,a.start_time startTime,
+        a.level,a.user_name userName,
+        a.department_name departmentName,
+        a.end_time endTime,a.excel_month excelMonth
+        from project a
+        left join (select project_id,sum(ut) monthut from ut_write a
+        where 1=1
+        <if test="param.yearMonth != null and param.yearMonth != ''">
+            and a.yearmonth = #{param.yearMonth}
+        </if>
+        group by project_id) b on b.project_id = a.id
+        left join (select project_id,sum(ut) usedut
+        from ut_write a where 1=1
+        <if test="param.yearMonth != null and param.yearMonth != ''">
+            and a.yearmonth &lt;= #{param.yearMonth}
+        </if>
+        group by project_id) c on c.project_id = a.id
+        where 1=1
+        <if test="param.departmentId != null and param.departmentId != ''">
+            and a.department_id = #{param.departmentId}
+        </if>
+        <if test="param.start != null and param.size != null">
+            limit #{param.start},#{param.size}
+        </if>
+    </select>
+    <!-- 员工月工时列表 -->
+    <select id="leaderApprovalWorkTimeList" parameterType="Map" resultType="Map">
+        select a.user_id,sum(ut) monthTime,b.username userName from ut_write a
+        left join sys_user b on a.user_id = b.user_id
+        where 1=1
+        <if test="param.status != null and param.status != ''">
+            and a.status = #{param.status}
+        </if>
+        <if test="param.yearMonth != null and param.yearMonth != ''">
+            and a.yearmonth = #{param.yearMonth}
+        </if>
+        <if test="param.projectId != null and param.projectId != ''">
+            and a.project_id = #{param.projectId}
+        </if>
+        group by a.user_id
+    </select>
+</mapper>

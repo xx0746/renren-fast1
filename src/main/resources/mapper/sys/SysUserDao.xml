@@ -57,5 +57,7 @@
 			</if>
 		</where>
 	</select>
-
+	<select id="userList" resultType="io.renren.modules.sys.entity.SysUserEntity">
+		select * from sys_user where username like #{userName} limit ${start}, ${size}
+	</select>
 </mapper>

@@ -21,8 +21,8 @@ import io.renren.common.validator.Assert;
 import io.renren.common.validator.ValidatorUtils;
 import io.renren.common.validator.group.AddGroup;
 import io.renren.common.validator.group.UpdateGroup;
-import io.renren.modules.performance.service.PerformanceService;
 import io.renren.modules.sys.dao.SysUserDao;
+import io.renren.modules.sys.entity.SysDepartmentEntity;
 import io.renren.modules.sys.entity.SysRoleEntity;
 import io.renren.modules.sys.entity.SysUserEntity;
 import io.renren.modules.sys.entity.SysUserRoleEntity;
@@ -30,6 +30,7 @@ import io.renren.modules.sys.form.PasswordForm;
 import io.renren.modules.sys.service.SysRoleService;
 import io.renren.modules.sys.service.SysUserRoleService;
 import io.renren.modules.sys.service.SysUserService;
+import io.renren.modules.sys.service.impl.SysDepartmentServiceImpl;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -58,11 +59,10 @@ public class SysUserController extends AbstractController {
 	private SysUserService sysUserService;
 	@Autowired
 	private SysUserRoleService sysUserRoleService;
-
+	@Autowired
+	private SysDepartmentServiceImpl sysDepartmentService;
 	@Autowired
 	private SysRoleService sysRoleService;
-	@Autowired
-	private PerformanceService performanceService;
 
 
 	/**
@@ -72,114 +72,11 @@ public class SysUserController extends AbstractController {
 	@RequiresPermissions("sys:user:list")
 	public R list(@RequestParam Map<String, Object> params){
 		//只有超级管理员，才能查看所有管理员列表
-//		if(getUserId() != Constant.SUPER_ADMIN){
-//			params.put("createUserId", getUserId());
-//		}
+
 		SysUserEntity user = getUser();
 		List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, user.getUserId()).list();
 		List<Long> roleIdList = list.stream().map(x -> x.getRoleId()).collect(Collectors.toList());
-		if (CollectionUtil.isEmpty(roleIdList)) {
 
-		} else if (roleIdList.contains(new Long("1"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("role", "1");
-			}
-		}else if (roleIdList.contains(new Long("9"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}
-		else if (roleIdList.contains(new Long("10"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("2"))) {
-			List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 10).list();
-			List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("11"))) {
-			List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 12).list();
-			List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("userIds", userIds);
-			}
-		}
-		else if (roleIdList.contains(new Long("12"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("13"))) {
-			List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 14).list();
-			List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("userIds", userIds);
-			}
-		}
-		else if (roleIdList.contains(new Long("14"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("15"))) {
-			List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 16).list();
-			List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("userIds", userIds);
-			}
-		}
-		else if (roleIdList.contains(new Long("16"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("17"))) {
-			List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 18).list();
-			List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("18"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("19"))) {
-			List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 20).list();
-			List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("userIds", userIds);
-			}
-		}
-		else if (roleIdList.contains(new Long("20"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("21"))) {
-			List<SysUserRoleEntity> list1 = sysUserRoleService.lambdaQuery().select(SysUserRoleEntity::getUserId).eq(SysUserRoleEntity::getRoleId, 22).list();
-			List<Long> userIds = list1.stream().map(x -> x.getUserId()).collect(Collectors.toList());
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				params.put("userIds", userIds);
-			}
-		}else if (roleIdList.contains(new Long("22"))) {
-			if (getUserId() != Constant.SUPER_ADMIN) {
-				List<Long> userIds = new ArrayList<>();
-				userIds.add(getUserId());
-				params.put("userIds", userIds);
-			}
-		}
 		PageUtils page = sysUserService.queryPage(params);
 
 		return R.ok().put("page", page);
@@ -191,12 +88,24 @@ public class SysUserController extends AbstractController {
 	public void export(HttpServletResponse response) throws IOException {
 		List<SysUserEntity> users = sysUserService.lambdaQuery().list();
 		users.stream().forEach(x->{
-			List<SysUserRoleEntity> list = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, x.getUserId()).list();
-			if (CollectionUtil.isNotEmpty(list)) {
-				Long roleId = list.get(0).getRoleId();
-				SysRoleEntity one = sysRoleService.lambdaQuery().eq(SysRoleEntity::getRoleId, roleId).one();
-				x.setRoleName(one.getRoleName());
+			List<SysUserRoleEntity> sysUserRoles = sysUserRoleService.lambdaQuery().eq(SysUserRoleEntity::getUserId, x.getUserId()).list();
+			if (CollectionUtil.isNotEmpty(sysUserRoles)) {
+				String roleName = "";
+				for(SysUserRoleEntity sysUserRoleEntity : sysUserRoles){
+					SysRoleEntity one = sysRoleService.lambdaQuery().eq(SysRoleEntity::getRoleId, sysUserRoleEntity.getRoleId()).one();
+					if(roleName.equals("")){
+						roleName=one.getRoleName();
+					}else {
+						roleName+=","+one.getRoleName();
+					}
+				}
+				x.setRoleName(roleName);
 			}
+			List<SysDepartmentEntity> list = sysDepartmentService.lambdaQuery().eq(SysDepartmentEntity::getId, x.getDepartmentId()).list();
+			if (CollectionUtil.isNotEmpty(list)) {
+				x.setDepartmentName(list.get(0).getDepartmentName());
+			}
+
 		});
 		response.setContentType("application/vnd.ms-excel");
 		response.setCharacterEncoding("utf-8");
@@ -210,7 +119,7 @@ public class SysUserController extends AbstractController {
 	 */
 	@PostMapping("/uploadExcel")
 	public R uploadExcel(@RequestParam("file") MultipartFile file) throws IOException {
-		EasyExcel.read(file.getInputStream(), SysUserEntity.class, new SysUserListener(sysUserService)).sheet().doRead();
+		EasyExcel.read(file.getInputStream(), SysUserEntity.class, new SysUserListener(sysUserService,sysDepartmentService,sysRoleService)).sheet().doRead();
 		return R.ok();
 	}
 
@@ -314,5 +223,10 @@ public class SysUserController extends AbstractController {
 		sysUserService.deleteBatch(userIds);
 		
 		return R.ok();
+	}
+	@PostMapping("/userList")
+	public R userList(Long current, Long size, String userName) {
+		Map<String,Object> returnMap = sysUserService.userList(current, size, userName);
+		return R.ok(returnMap);
 	}
 }

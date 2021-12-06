@@ -92,6 +92,17 @@ public class SysUserEntity implements Serializable {
 	 */
 	@ExcelIgnore
 	private Long createUserId;
+	/**
+	 * 部门ID
+	 */
+	@ExcelIgnore
+	private Long departmentId;
+	/**
+	 * 部门名称
+	 */
+	@TableField(exist=false)
+	@ExcelProperty(value = "部门名称", index = 5)
+	private String departmentName;
 
 	/**
 	 * 创建时间
@@ -112,22 +123,25 @@ public class SysUserEntity implements Serializable {
 	private String level;
 
 	/**
-	 * 部门名
+	 * 角色名
 	 */
 	@TableField(exist=false)
-	@ExcelProperty(value = "部门名", index = 5)
+	/*@ExcelIgnore*/
+	@ExcelProperty(value = "角色名", index = 6)
 	private String roleName;
 
 	/**
-	 * 部门名
+	 *
 	 */
 	@TableField(exist=false)
+	@ExcelIgnore
 	private Integer rankage;
 
 	/**
 	 * 总分
 	 */
 	@TableField(exist=false)
+	@ExcelIgnore
 	private Integer examine;
 
 
