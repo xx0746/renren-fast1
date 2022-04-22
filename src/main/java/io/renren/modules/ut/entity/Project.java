@@ -37,6 +37,9 @@ public class Project {
     private String according;
     @ExcelProperty(value = "项目级别", index = 9)
     private String level;
+    @TableField(exist = false)
+    @ExcelProperty(value = "项目成员", index = 10)
+    private String projectUserNames;
     @ExcelIgnore
     private String projectType;
     @ExcelIgnore

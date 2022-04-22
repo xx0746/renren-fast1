@@ -14,6 +14,7 @@ import io.renren.modules.sys.service.SysRoleService;
 import io.renren.modules.sys.service.SysUserService;
 import io.renren.modules.ut.entity.Project;
 import io.renren.modules.ut.service.ProjectService;
+import io.renren.modules.ut.service.UserProjectService;
 import io.renren.modules.ut.service.WriteService;
 import io.renren.modules.ut.util.ProjectListener;
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +34,8 @@ import java.util.stream.Collectors;
 public class ProjectController extends AbstractController {
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private UserProjectService userProjectService;
     @Autowired
     private WriteService writeService;
     @Autowired
@@ -78,7 +81,7 @@ public class ProjectController extends AbstractController {
     public R projectUpload(@RequestParam("file") MultipartFile file,@RequestParam("excelMonth") String excelMonth) {
         try {
             EasyExcel.read(file.getInputStream(), Project.class,
-                    new ProjectListener(projectService,sysUserService,sysDepartmentService,excelMonth))
+                    new ProjectListener(projectService,userProjectService,sysUserService,sysDepartmentService,excelMonth))
                     .sheet().headRowNumber(2).doRead();
         }catch (Exception e){
             e.printStackTrace();

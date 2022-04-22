@@ -184,6 +184,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserDao, SysUserEntity> i
 		return returnMap;
 	}
 
+	@Override
+	public SysUserEntity selectByUserName(String userName) {
+		return baseMapper.queryByUserName(userName);
+	}
+
 
 	/**
 	 * 检查角色是否越权

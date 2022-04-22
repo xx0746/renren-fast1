@@ -12,7 +12,9 @@ import io.renren.modules.sys.service.SysDepartmentService;
 import io.renren.modules.sys.service.SysRoleService;
 import io.renren.modules.sys.service.SysUserService;
 import io.renren.modules.ut.entity.Project;
+import io.renren.modules.ut.entity.UserProject;
 import io.renren.modules.ut.service.ProjectService;
+import io.renren.modules.ut.service.UserProjectService;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -32,6 +34,7 @@ public class ProjectListener extends AnalysisEventListener<Project> {
      * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
      */
     private ProjectService projectService;
+    private UserProjectService userProjectService;
     private String excelMonth;
     private SysUserService sysUserService;
     SysDepartmentService sysDepartmentService;
@@ -44,10 +47,11 @@ public class ProjectListener extends AnalysisEventListener<Project> {
      * 不要使用自动装配
      * 在测试类中将dao当参数传进来
      */
-    public ProjectListener(ProjectService projectService, SysUserService sysUserService,
+    public ProjectListener(ProjectService projectService, UserProjectService userProjectService, SysUserService sysUserService,
                            SysDepartmentService sysDepartmentService, String excelMonth) {
         this.projectService = projectService;
         this.excelMonth = excelMonth;
+        this.userProjectService = userProjectService;
         this.sysUserService = sysUserService;
         this.sysDepartmentService = sysDepartmentService;
     }
@@ -132,7 +136,22 @@ public class ProjectListener extends AnalysisEventListener<Project> {
                /* sysUserEntity.setPassword(sysUserEntity.getMobile());
                 sysUserEntity.setStatus(1);
                 sysUserService.saveUser(sysUserEntity);*/
+                //sysUserService.queryByUserName()
                 projectService.save(project);
+                if(project.getProjectUserNames() != null && project.getProjectUserNames().length() > 0){
+                    String[] userNames = project.getProjectUserNames().split(",");
+                    for (String userName : userNames) {
+                        userName = userName.trim().replaceAll(" ","")
+                                .replaceAll("  ","");
+                        if(userName != null && userName.length() > 0){
+                            SysUserEntity sysUserEntity = sysUserService.selectByUserName(userName);
+                            if(sysUserEntity != null){
+                                UserProject userProject = new UserProject(project.getId(),sysUserEntity.getUserId(), 0D);
+                                userProjectService.save(userProject);
+                            }
+                        }
+                    }
+                }
             } else {
                 break;
             }

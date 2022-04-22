@@ -15,7 +15,9 @@ import java.util.Map;
  */
 public interface ApprovalService extends IService<UTWrite> {
     Map<String, Object> managerProjectApprovalList(Map<String,Object> queryMap);
+    Map<String, Object> managerProjectDayApprovalList(Map<String,Object> queryMap);
     Map<String, Object> managerApprovalWorkTimeList(Map<String,Object> queryMap);
+    Map<String, Object> managerDayApprovalWorkTimeList(Map<String,Object> queryMap);
     Map<String, Object> leaderProjectApprovalList(Map<String,Object> queryMap);
     Map<String, Object> leaderApprovalWorkTimeList(Map<String,Object> queryMap);
 

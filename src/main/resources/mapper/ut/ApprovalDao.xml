@@ -111,4 +111,59 @@
         </if>
         group by a.user_id
     </select>
+
+
+    <select id="managerProjectDayApprovalList" parameterType="Map" resultType="Map">
+        select  a.id,a.code,a.name,a.ut,
+        COALESCE(b.dayut,0) dayut,
+        COALESCE(c.usedut,0) usedut,
+        a.ut-COALESCE(c.usedut,0) unusedut,
+        a.according,a.start_time startTime,
+        a.level,a.user_name userName,
+        a.department_name departmentName,
+        a.end_time endTime,a.excel_month excelMonth
+        from project a
+        left join (select project_id,sum(ut) dayut from ut_write_day a
+        where 1=1
+        <if test="param.yearMonthDay != null and param.yearMonthDay != ''">
+            and a.year_month_day = #{param.yearMonthDay}
+        </if>
+        group by project_id) b on b.project_id = a.id
+        left join (select project_id,sum(ut) usedut
+        from ut_write_day a where 1=1
+        <if test="param.yearMonthDay != null and param.yearMonthDay != ''">
+            and a.year_month_day &lt;= #{param.yearMonthDay}
+        </if>
+        group by project_id) c on c.project_id = a.id
+        where 1=1
+        <if test="param.userId != null and param.userId != ''">
+            and a.user_id = #{param.userId}
+        </if>
+        <if test="param.departmentId != null and param.departmentId != ''">
+            and a.department_id = #{param.departmentId}
+        </if>
+        <if test="param.start != null and param.size != null">
+            limit #{param.start},#{param.size}
+        </if>
+    </select>
+
+    <!-- 日工作类型工时列表 -->
+    <select id="managerDayApprovalWorkTimeList" parameterType="Map" resultType="Map">
+        select a.id,a.one_id oneId,a.two_id twoId,a.user_id userId,a.ut,
+        b.username,c.name oneName,d.name twoName,a.project_id projectId
+        from ut_write_day a
+        left join sys_user b on a.user_id = b.user_id
+        left join work_type c on c.id = a.one_id
+        left join work_type d on d.id = a.two_id
+        where 1=1
+        <if test="param.yearMonthDay != null and param.yearMonthDay != ''">
+            and a.year_month_day = #{param.yearMonthDay}
+        </if>
+        <if test="param.status != null and param.status != ''">
+            and a.status in ( ${param.status} )
+        </if>
+        <if test="param.projectId != null and param.projectId != ''">
+            and a.project_id = #{param.projectId}
+        </if>
+    </select>
 </mapper>
